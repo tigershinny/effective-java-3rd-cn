@@ -43,7 +43,7 @@ public class NutritionFacts {
 ```
 当你想创建一个实例，用包含你想设置所有参数的最短参数列表的构造子：
 
-```
+```java
 NutritionFacts cocaCola = new NutritionFacts(240, 8, 100, 0, 35, 27);
 ```
 通常，调用这样的构造子需要你不想设置的参数，但是你被迫为它们传递参数。这种情况下，你传递0这个值给fat。对于“只有”六个参数的情况，这个看上去不算很糟，但是当参数数量增加时，很快就会失控。
@@ -51,7 +51,7 @@ NutritionFacts cocaCola = new NutritionFacts(240, 8, 100, 0, 35, 27);
 简而言之，**重叠构造子模式奏效，但是当有很多参数的时候，写客户端代码是困难的，读代码更困难**。阅读的人会想，这些值是什么，而且必须细心计算参数来弄明白。相同类型参数的长长的系列会造成微妙的bug。如果客户端不慎颠倒了两个这样的参数，编译器不会发现，但是程序在运行时异常(条目51)。
 
 当面临许多可选参数的构造子时，第二个替代方案是JavaBean模式，这个模式中，你调用一个无参数的构造子来创建一个对象，然后调用设置方法来设置每个必需的参数和感兴趣的可选参数：
-```
+```java
 // JavaBeans Pattern - allows inconsistency, mandates mutability
 public class NutritionFacts {
     // Parameters initialized to default values (if any)
@@ -74,7 +74,7 @@ public class NutritionFacts {
 ```
 这个模式没有重叠构造子模式的缺点。虽然有点啰嗦，但是容易创建实例，代码也容易阅读：
 
-```
+```java
 NutritionFacts cocaCola = new NutritionFacts();
 cocaCola.setServingSize(240);
 cocaCola.setServings(8);
@@ -86,7 +86,7 @@ cocaCola.setCarbohydrate(27);
 手动“冻结(freezing)”对象来减少这些缺点是可能的：当对象构造完成了，不允许使用直到冻结。但是这个变体是笨拙的，在实践中用的非常稀少。此外，在运行中会造成错误，因为在使用它之前，编译器不能保证编码者调用一个对象的冻结方法。
 幸运的是，有第三种选择，可以结合重叠构造子模式的安全性和JavaBean模式的可读性。这个是*Builder*模式[Gamma95]的一种形式。不是直接生成对象，而是客户端调用有所有必需参数的一个构造子(或者静态工厂)，获得一个*builder*对象。然后客户端在builder对象上调用类似设置方法，分别设置感兴趣的可选参数。最后，客户端调用无参数的build方法来生成对象，这个对象一般是不可变的。builder是一个它构建的类的静态成员类(条目24)。下面是在实践中的样子：
 
-```
+```java
 // Builder Pattern
 public class NutritionFacts {
     private final int servingSize;
@@ -137,7 +137,7 @@ public class NutritionFacts {
 ```
 NutritionFacts类是不变的，所有参数的默认值在一个地方。builder的设置方法返回builder自身，可以链式调用，所以有流畅的API。下面是客户端代码的样子：
 
-```
+```java
 NutritionFacts cocaCola = new NutritionFacts.Builder(240, 8)
         .calories(100).sodium(35).carbohydrate(27).build();
 ```
@@ -146,7 +146,7 @@ NutritionFacts cocaCola = new NutritionFacts.Builder(240, 8)
 为了简单，省略了有效性检查。为了尽快发现无效的参数，在builder构造子和方法中检查参数的有效性。build方法调用的有多个参数的构造子，检查这些不变量。为了保证这些不变量不受攻击，在拷贝builder的参数后(条目50)，务必对对象的域进行检查。如果检查失败，抛出IllegalArgumentException，它的具体信息表示哪些参数是无效的(条目75)。
 
 **builder模式非常适合类继承**。使用并行的builder的层级，每个builder嵌套在对应的类中。抽象的类有抽象的builder；具体的类有具体的builder。比如，考虑一个抽象类是代表各种种类披萨的层级的根类:
-```
+```java
 // Builder pattern for class hierarchies
 public abstract class Pizza {
    public enum Topping { HAM, MUSHROOM, ONION, PEPPER, SAUSAGE }
@@ -173,7 +173,7 @@ public abstract class Pizza {
 
 Pizza有两个具体的子类，一个是纽约类型的比萨，另外一个是半月比萨。前者有指定大小的参数，而后者需要指定酱汁是在外面还是里面。
 
-```
+```java
 public class NyPizza extends Pizza {
     public enum Size { SMALL, MEDIUM, LARGE }
     private final Size size;
@@ -226,7 +226,7 @@ public class Calzone extends Pizza {
 
 客户端的代码例子如下，为了简洁，假设enum常量是静态导入：
 
-```
+```java
 NyPizza pizza = new NyPizza.Builder(SMALL)
         .addTopping(SAUSAGE).addTopping(ONION).build();
 Calzone calzone = new Calzone.Builder()
