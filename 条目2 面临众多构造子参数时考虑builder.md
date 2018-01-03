@@ -2,7 +2,7 @@
 
 对于这样的类，你打算用什么类型的构造子或者静态工厂？习惯上，编程人员用*重叠构造子(telescoping constructor)模式*：提供仅仅必需参数的构造子，有单个可选参数的另外一个构造子，和有两个可选参数的第三个构造子，等等，最后有所有可选参数的构造子。这是实践中的样子。为了简单起见，只展示四个可选参数：
 
-```
+```java
 // Telescoping constructor pattern - does not scale well!
 public class NutritionFacts {
     private final int servingSize;  // (mL)            required
