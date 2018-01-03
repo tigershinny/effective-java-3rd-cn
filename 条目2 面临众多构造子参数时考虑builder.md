@@ -3,14 +3,14 @@
 对于这样的类，你打算用什么类型的构造子或者静态工厂？习惯上，编程人员用*重叠构造子(telescoping constructor)模式*：提供仅仅必需参数的构造子，有单个可选参数的另外一个构造子，和有两个可选参数的第三个构造子，等等，最后有所有可选参数的构造子。这是实践中的样子。为了简单起见，只展示四个可选参数：
 
 ```java
-// Telescoping constructor pattern - does not scale well!
+// 重叠构造子模式 - 扩展性不好!
 public class NutritionFacts {
-    private final int servingSize;  // (mL)            required
-    private final int servings;     // (per container) required
-    private final int calories;     // (per serving)   optional
-    private final int fat;          // (g/serving)     optional
-    private final int sodium;       // (mg/serving)    optional
-    private final int carbohydrate; // (g/serving)     optional
+    private final int servingSize;  // (mL)            必需的
+    private final int servings;     // (per container) 必需的
+    private final int calories;     // (per serving)   可选的
+    private final int fat;          // (g/serving)     可选的
+    private final int sodium;       // (mg/serving)    可选的
+    private final int carbohydrate; // (g/serving)     可选的
 
     public NutritionFacts(int servingSize, int servings) {
         this(servingSize, servings, 0);
@@ -52,11 +52,11 @@ NutritionFacts cocaCola = new NutritionFacts(240, 8, 100, 0, 35, 27);
 
 当面临许多可选参数的构造子时，第二个替代方案是JavaBean模式，这个模式中，你调用一个无参数的构造子来创建一个对象，然后调用设置方法来设置每个必需的参数和感兴趣的可选参数：
 ```java
-// JavaBeans Pattern - allows inconsistency, mandates mutability
+// JavaBean模式 - 允许不一致性, 支持可变性
 public class NutritionFacts {
-    // Parameters initialized to default values (if any)
-    private int servingSize  = -1; // Required; no default value
-    private int servings     = -1; // Required; no default value
+    // 初始化为默认值的参数(如果有)
+    private int servingSize  = -1; // 必需的; 无默认值
+    private int servings     = -1; // 必需的; 无默认值
     private int calories     = 0;
     private int fat          = 0;
     private int sodium       = 0;
@@ -87,7 +87,7 @@ cocaCola.setCarbohydrate(27);
 幸运的是，有第三种选择，可以结合重叠构造子模式的安全性和JavaBean模式的可读性。这个是*Builder*模式[Gamma95]的一种形式。不是直接生成对象，而是客户端调用有所有必需参数的一个构造子(或者静态工厂)，获得一个*builder*对象。然后客户端在builder对象上调用类似设置方法，分别设置感兴趣的可选参数。最后，客户端调用无参数的build方法来生成对象，这个对象一般是不可变的。builder是一个它构建的类的静态成员类(条目24)。下面是在实践中的样子：
 
 ```java
-// Builder Pattern
+// Builder模式
 public class NutritionFacts {
     private final int servingSize;
     private final int servings;
@@ -97,11 +97,11 @@ public class NutritionFacts {
     private final int carbohydrate;
 
     public static class Builder {
-        // Required parameters
-        private final int servingSize;
+        // 必需的参数
+        private final int servingSize;
         private final int servings;
 
-        // Optional parameters - initialized to default values
+        // 可选的参数 - 初始化为默认值
         private int calories      = 0;
         private int fat           = 0;
         private int sodium        = 0;
@@ -147,7 +147,7 @@ NutritionFacts cocaCola = new NutritionFacts.Builder(240, 8)
 
 **builder模式非常适合类继承**。使用并行的builder的层级，每个builder嵌套在对应的类中。抽象的类有抽象的builder；具体的类有具体的builder。比如，考虑一个抽象类是代表各种种类披萨的层级的根类:
 ```java
-// Builder pattern for class hierarchies
+// 为类层级的Builder模式
 public abstract class Pizza {
    public enum Topping { HAM, MUSHROOM, ONION, PEPPER, SAUSAGE }
    final Set<Topping> toppings;
@@ -202,7 +202,7 @@ public class Calzone extends Pizza {
     private final boolean sauceInside;
 
     public static class Builder extends Pizza.Builder<Builder> {
-        private boolean sauceInside = false; // Default
+        private boolean sauceInside = false; // 默认
 
         public Builder sauceInside() {
             sauceInside = true;
